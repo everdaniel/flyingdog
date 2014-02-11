@@ -6,83 +6,9 @@ game.module(
 )
 .body(function() {
 
-Gap = game.Sprite.extend({
-    groundTop: 800,
-    gapWidth: 132,
-    gapMinY: 150,
-    gapMaxY: 550,
-    gapSize: 152 + 4 * 20,
-    gapSpeed: -300,
-
-    init: function() {
-        var y = Math.round(game.Math.random(this.gapMinY, this.gapMaxY));
-
-        var topHeight = y - this.gapSize / 2;
-        this.topBody = new game.Body({
-            position: {x: game.system.width + this.gapWidth / 2, y: topHeight / 2},
-            velocity: {x: this.gapSpeed}
-        });
-        var topShape = new game.Rectangle(this.gapWidth, topHeight);
-        this.topBody.addShape(topShape);
-        game.scene.world.addBody(this.topBody);
-
-        var bottomHeight = this.groundTop - topHeight - this.gapSize;
-        this.bottomBody = new game.Body({
-            position: {x: game.system.width + this.gapWidth / 2, y: topHeight + this.gapSize + bottomHeight / 2},
-            velocity: {x: this.gapSpeed}
-        });
-        var bottomShape = new game.Rectangle(this.gapWidth, bottomHeight);
-        this.bottomBody.addShape(bottomShape);
-        game.scene.world.addBody(this.bottomBody);
-
-        this.goalBody = new game.Body({
-            position: {x: game.system.width + this.gapWidth / 2 + this.gapWidth + game.scene.player.body.shape.width, y: topHeight + this.gapSize / 2},
-            velocity: {x: this.gapSpeed},
-            collisionGroup: 1,
-            collideAgainst: 1
-        });
-        this.goalBody.collide = function() {
-            game.scene.world.removeBody(this);
-            game.scene.addScore();
-            return false;
-        }
-        var goalShape = new game.Rectangle(this.gapWidth, this.gapSize + game.scene.player.body.shape.height);
-        this.goalBody.addShape(goalShape);
-        game.scene.world.addBody(this.goalBody);
-
-        this.topSprite = new game.Sprite(game.system.width + this.gapWidth / 2, topHeight, 'media/bar.png', {
-            anchor: {x: 0.5, y: 0.0},
-            scale: {y: -1}
-        });
-        game.scene.gapContainer.addChild(this.topSprite);
-
-        this.bottomSprite = new game.Sprite(game.system.width + this.gapWidth / 2, topHeight + this.gapSize, 'media/bar.png', {
-            anchor: {x: 0.5, y: 0.0},
-        });
-        game.scene.gapContainer.addChild(this.bottomSprite);
-    },
-
-    update: function() {
-        this.topSprite.position.x = this.bottomSprite.position.x = this.topBody.position.x;
-        if(this.topSprite.position.x + this.gapWidth / 2 < 0) {
-            game.scene.world.removeBody(this.topBody);
-            game.scene.world.removeBody(this.bottomBody);
-            game.scene.world.removeBody(this.goalBody);
-            game.scene.gapContainer.removeChild(this.topSprite);
-            game.scene.gapContainer.removeChild(this.bottomSprite);
-            game.scene.removeObject(this);
-        }
-    }
-});
-
-Cloud = game.Sprite.extend({
-    update: function() {
-        this.position.x += this.speed * game.scene.cloudSpeed * game.system.delta;
-        if(this.position.x + this.width < 0) this.position.x = game.system.width;
-    }
-});
-
 Player = game.Class.extend({
+    jumpPower: -750,
+
     init: function() {
         var x = game.system.width / 2;
         var y = 500;
@@ -135,7 +61,7 @@ Player = game.Class.extend({
         if(!game.scene.ended) {
             game.scene.gameOver();
             this.body.velocity.y = -200;
-            this.remove();
+            this.smokeEmitter.rate = 0;
         }
         this.body.velocity.x = 0;;
         return true;
@@ -152,10 +78,87 @@ Player = game.Class.extend({
         this.flyEmitter.target.y = this.sprite.position.y - 30;
     },
 
-    remove: function() {
-        // game.scene.world.removeBody(this.body);
-        // this.sprite.remove();
-        this.smokeEmitter.rate = 0;
+    jump: function() {
+        if(this.body.position.y < 0) return;
+        this.body.velocity.y = this.jumpPower;
+        game.sound.playSound('jump');
+    }
+});
+
+// game.Class ?
+Gap = game.Class.extend({
+    groundTop: 800,
+    width: 132,
+    minY: 150,
+    maxY: 550,
+    height: 232,
+    speed: -300,
+
+    init: function() {
+        var y = Math.round(game.Math.random(this.minY, this.maxY));
+
+        var topHeight = y - this.height / 2;
+        this.topBody = new game.Body({
+            position: {x: game.system.width + this.width / 2, y: topHeight / 2},
+            velocity: {x: this.speed}
+        });
+        var topShape = new game.Rectangle(this.width, topHeight);
+        this.topBody.addShape(topShape);
+        game.scene.world.addBody(this.topBody);
+
+        var bottomHeight = this.groundTop - topHeight - this.height;
+        this.bottomBody = new game.Body({
+            position: {x: game.system.width + this.width / 2, y: topHeight + this.height + bottomHeight / 2},
+            velocity: {x: this.speed}
+        });
+        var bottomShape = new game.Rectangle(this.width, bottomHeight);
+        this.bottomBody.addShape(bottomShape);
+        game.scene.world.addBody(this.bottomBody);
+
+        this.goalBody = new game.Body({
+            position: {x: game.system.width + this.width / 2 + this.width + game.scene.player.body.shape.width, y: topHeight + this.height / 2},
+            velocity: {x: this.speed},
+            collisionGroup: 1,
+            collideAgainst: 1
+        });
+        this.goalBody.collide = function() {
+            game.scene.world.removeBody(this);
+            game.scene.addScore();
+            return false;
+        }
+        var goalShape = new game.Rectangle(this.width, this.height + game.scene.player.body.shape.height);
+        this.goalBody.addShape(goalShape);
+        game.scene.world.addBody(this.goalBody);
+
+        this.topSprite = new game.Sprite(game.system.width + this.width / 2, topHeight, 'media/bar.png', {
+            anchor: {x: 0.5, y: 0.0},
+            scale: {y: -1}
+        });
+        game.scene.gapContainer.addChild(this.topSprite);
+
+        this.bottomSprite = new game.Sprite(game.system.width + this.width / 2, topHeight + this.height, 'media/bar.png', {
+            anchor: {x: 0.5, y: 0.0},
+        });
+        game.scene.gapContainer.addChild(this.bottomSprite);
+    },
+
+    update: function() {
+        this.topSprite.position.x = this.bottomSprite.position.x = this.topBody.position.x;
+        if(this.topSprite.position.x + this.width / 2 < 0) {
+            game.scene.world.removeBody(this.topBody);
+            game.scene.world.removeBody(this.bottomBody);
+            game.scene.world.removeBody(this.goalBody);
+            game.scene.gapContainer.removeChild(this.topSprite);
+            game.scene.gapContainer.removeChild(this.bottomSprite);
+            game.scene.removeObject(this);
+        }
+    }
+});
+
+Cloud = game.Sprite.extend({
+    update: function() {
+        this.position.x += this.speed * game.scene.cloudSpeedFactor * game.system.delta;
+        if(this.position.x + this.width < 0) this.position.x = game.system.width;
     }
 });
 
