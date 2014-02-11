@@ -12,7 +12,15 @@ Player = game.Class.extend({
     init: function() {
         var x = game.system.width / 2;
         var y = 500;
-        this.sprite = new game.Sprite(x, y, 'media/player.png', {anchor: {x:0.5, y:0.5}});
+        this.sprite = new game.MovieClip([
+            game.Texture.fromImage('media/player1.png'),
+            game.Texture.fromImage('media/player2.png')
+        ]);
+        this.sprite.position.x = x;
+        this.sprite.position.y = y;
+        this.sprite.anchor.x = this.sprite.anchor.y = 0.5;
+        this.sprite.animationSpeed = 0.1;
+        this.sprite.play();
         game.scene.stage.addChild(this.sprite);
         game.scene.addObject(this);
 

@@ -88,15 +88,60 @@ SceneTitle = game.Scene.extend({
         this.player.jump();
     },
 
-    gameOver: function() {
-        if(this.score > 0) {
-            var highScore = parseInt(game.storage.get('highScore'));
-            if(!highScore || highScore < this.score) {
-                // New highscore
-                game.storage.set('highScore', this.score);
-            }
-        }
+    showScore: function() {
+        var box = new game.Sprite(game.system.width / 2, game.system.height / 2, 'media/gameover.png', {anchor: {x:0.5, y:0.5}});
 
+        var highScore = parseInt(game.storage.get('highScore')) || 0;
+        if(this.score > highScore) game.storage.set('highScore', this.score);
+
+        var highScoreText = new game.BitmapText(highScore.toString(), {font: 'Pixel'});
+        highScoreText.position.x = 27;
+        highScoreText.position.y = 43;
+        box.addChild(highScoreText);
+
+        var scoreText = new game.BitmapText('0', {font: 'Pixel'});
+        scoreText.position.x = highScoreText.position.x;
+        scoreText.position.y = -21;
+        box.addChild(scoreText);
+
+        game.scene.stage.addChild(box);
+
+        this.restartButton = new game.Sprite(game.system.width / 2, 676, 'media/restart.png', {
+            anchor: {x:0.5, y:0.5},
+            scale: {x:0, y:0},
+            interactive: true,
+            mousedown: function() {
+                game.system.setScene(SceneTitle);
+            }
+        });
+
+        if(this.score > 0) {
+            var time = Math.min(0.1, 1 / this.score);
+            var scoreCounter = 0;
+            this.addTimer(time, function() {
+                scoreCounter++;
+                scoreText.setText(scoreCounter.toString());
+                if(scoreCounter >= game.scene.score) {
+                    this.repeat = false;
+                    if(game.scene.score > highScore) {
+                        game.sound.playSound('highscore');
+                        var newBox = new game.Sprite(-208, 59, 'media/new.png');
+                        box.addChild(newBox);
+                    }
+                    game.scene.showRestartButton();
+                }
+            }, true);
+        } else {
+            this.showRestartButton();
+        }
+    },
+
+    showRestartButton: function() {
+        this.addTween(this.restartButton.scale, {x:1, y:1}, 0.2, {easing: game.Tween.Easing.Back.Out}).start();
+        this.stage.addChild(this.restartButton);
+    },
+
+    gameOver: function() {
         var i;
         this.cloudSpeedFactor = 0.2;
         this.ended = true;
@@ -108,9 +153,7 @@ SceneTitle = game.Scene.extend({
             this.world.bodies[i].velocity.set(0,0);
         }
 
-        this.addTimer(2, function() {
-            game.system.setScene(SceneTitle);
-        });
+        this.addTimer(0.5, this.showScore.bind(this));
 
         game.sound.stopMusic();
         game.sound.playSound('explosion');
