@@ -93,7 +93,6 @@ Player = game.Class.extend({
     }
 });
 
-// game.Class ?
 Gap = game.Class.extend({
     groundTop: 800,
     width: 132,
