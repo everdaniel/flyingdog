@@ -106,7 +106,7 @@ SceneTitle = game.Scene.extend({
 
         game.scene.stage.addChild(box);
 
-        this.restartButton = new game.Sprite(game.system.width / 2, 676, 'media/restart.png', {
+        this.restartButton = new game.Sprite(game.system.width / 2, game.system.height / 2 + 250, 'media/restart.png', {
             anchor: {x:0.5, y:0.5},
             scale: {x:0, y:0},
             interactive: true,

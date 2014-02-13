@@ -12,6 +12,7 @@ game.module(
 
 game.Storage.id = 'net.pandajs.flyingdog';
 
-game.start();
+if(game.device.cocoonjs) game.start();
+else game.start(SceneTitle, window.innerWidth, window.innerHeight);
 
 });
