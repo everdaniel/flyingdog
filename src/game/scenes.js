@@ -6,7 +6,7 @@ game.module(
 )
 .body(function() {
 
-SceneTitle = game.Scene.extend({
+SceneGame = game.Scene.extend({
     backgroundColor: 0xb2dcef,
     gapTime: 1.5,
     gravity: 2000,
@@ -43,7 +43,7 @@ SceneTitle = game.Scene.extend({
         this.world.addBody(groundBody);
 
         this.scoreText = new game.BitmapText(this.score.toString(), {font: 'Pixel'});
-        this.scoreText.position.x = 16;
+        this.scoreText.position.x = game.system.width / 2 - this.scoreText.textWidth / 2;
         this.stage.addChild(this.scoreText);
 
         var text = new game.Sprite(game.system.width / 2, game.system.height - 48, 'media/madewithpanda.png', {
@@ -111,7 +111,7 @@ SceneTitle = game.Scene.extend({
             scale: {x:0, y:0},
             interactive: true,
             mousedown: function() {
-                game.system.setScene(SceneTitle);
+                game.system.setScene(SceneGame);
             }
         });
 

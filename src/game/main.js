@@ -11,8 +11,8 @@ game.module(
 .body(function(){
 
 game.Storage.id = 'net.pandajs.flyingdog';
+game.System.idtkScale = 'ScaleAspectFill';
 
-if(game.device.cocoonjs) game.start();
-else game.start(SceneTitle, window.innerWidth, window.innerHeight);
+game.start(SceneGame, 768, 1024);
 
 });
