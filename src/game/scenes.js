@@ -81,6 +81,7 @@ SceneGame = game.Scene.extend({
     mousedown: function() {
         if(this.ended) return;
         if(this.player.body.mass === 0) {
+            game.analytics.event('play');
             this.player.body.mass = 1;
             this.logo.remove();
             this.addTimer(this.gapTime, this.spawnGap.bind(this), true);
@@ -111,6 +112,7 @@ SceneGame = game.Scene.extend({
             scale: {x:0, y:0},
             interactive: true,
             mousedown: function() {
+                game.analytics.event('restart');
                 game.system.setScene(SceneGame);
             }
         });
